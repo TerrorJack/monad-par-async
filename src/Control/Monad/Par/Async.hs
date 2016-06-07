@@ -7,6 +7,7 @@ import Control.Monad.Catch hiding (try)
 import Control.Monad.IO.Class
 import Control.Monad.Par.Class
 import Control.Monad.Par.IO
+import Data.Functor
 import Data.Semigroup
 
 newtype Async a = Async { unAsync :: ParIO (Either SomeException a) }
@@ -20,6 +21,9 @@ runAsync m = do
 
 tryAsync :: Async a -> IO (Either SomeException a)
 tryAsync = runParIO . unAsync
+
+liftParIO :: ParIO a -> Async a
+liftParIO m = Async $ Right <$> m
 
 instance Functor Async where
     fmap f m = Async $ fmap (fmap f) $ unAsync m
@@ -40,7 +44,7 @@ instance Applicative Async where
                     Right a' -> return $ Right $ f' a'
 
 instance Monad Async where
-    return = Async . return . Right
+    return = liftParIO . return
 
     m >>= f = Async $ do
         r <- unAsync m
@@ -49,7 +53,7 @@ instance Monad Async where
             Right a -> unAsync $ f a
 
 instance MonadIO Async where
-    liftIO = Async . liftIO . try
+    liftIO = liftParIO . liftIO
 
 instance MonadBase IO Async where
     liftBase = liftIO
@@ -86,3 +90,32 @@ instance MonadCatch Async where
                 Just e' -> unAsync $ f e'
                 _ -> return $ Left e
             Right a -> return $ Right a
+
+newtype AVar a = AVar { unAVar :: IVar (Either SomeException a) }
+
+newAVar :: Async (AVar a)
+newAVar = liftParIO $ AVar <$> new
+
+getAVar :: AVar a -> Async a
+getAVar = Async . get . unAVar
+
+putAVar :: AVar a -> a -> Async ()
+putAVar v ~a = liftParIO $ put_ (unAVar v) (Right a)
+
+forkAsync :: Async a -> Async ()
+forkAsync m = liftParIO $ fork $ unAsync m $> ()
+
+spawnAsync :: Async a -> Async (AVar a)
+spawnAsync m = do
+    v <- newAVar
+    fork $ m >>= putAVar v
+    return v
+
+instance ParFuture AVar Async where
+    spawn_ = spawnAsync
+    get = getAVar
+
+instance ParIVar AVar Async where
+    fork = forkAsync
+    new = newAVar
+    put_ = putAVar
