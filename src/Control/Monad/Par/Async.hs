@@ -11,6 +11,16 @@ import Data.Semigroup
 
 newtype Async a = Async { unAsync :: ParIO (Either SomeException a) }
 
+runAsync :: Async a -> IO a
+runAsync m = do
+    r <- tryAsync m
+    case r of
+        Left (SomeException e) -> throwIO e
+        Right a -> return a
+
+tryAsync :: Async a -> IO (Either SomeException a)
+tryAsync m = runParIO $ unAsync m
+
 instance Functor Async where
     fmap f m = Async $ fmap (fmap f) $ unAsync m
 
