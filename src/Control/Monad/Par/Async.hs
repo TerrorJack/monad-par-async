@@ -19,7 +19,7 @@ runAsync m = do
         Right a -> return a
 
 tryAsync :: Async a -> IO (Either SomeException a)
-tryAsync m = runParIO $ unAsync m
+tryAsync = runParIO . unAsync
 
 instance Functor Async where
     fmap f m = Async $ fmap (fmap f) $ unAsync m
