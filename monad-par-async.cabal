@@ -1,7 +1,6 @@
 name:                monad-par-async
 version:             0.0.1
---synopsis:
---description:
+synopsis:            Lightweight implementation of Async using monad-par.
 homepage:            http://github.com/TerrorJack/monad-par-async
 license:             BSD3
 license-file:        LICENSE
