@@ -106,10 +106,10 @@ forkAsync :: Async a -> Async ()
 forkAsync m = liftParIO $ fork $ unAsync m $> ()
 
 spawnAsync :: Async a -> Async (AVar a)
-spawnAsync m = do
-    v <- newAVar
-    fork $ m >>= putAVar v
-    return v
+spawnAsync m = liftParIO $ do
+    v <- new
+    fork $ unAsync m >>= put_ v
+    return $ AVar v
 
 instance ParFuture AVar Async where
     spawn_ = spawnAsync
