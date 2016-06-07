@@ -2,6 +2,7 @@ module Control.Monad.Par.Async where
 
 import Control.Applicative
 import Control.Exception
+import Control.Monad.Base
 import Control.Monad.Catch hiding (try)
 import Control.Monad.IO.Class
 import Control.Monad.Par.Class
@@ -39,6 +40,9 @@ instance Monad Async where
 
 instance MonadIO Async where
     liftIO = Async . liftIO . try
+
+instance MonadBase IO Async where
+    liftBase = liftIO
 
 data AsyncEmptyException = AsyncEmptyException
     deriving (Exception, Show)

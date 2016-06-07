@@ -20,9 +20,11 @@ library
                      , monad-par
                      , abstract-par
                      , exceptions
+                     , transformers-base
   ghc-options:         -Wall
   default-extensions:  Strict
                      , DeriveAnyClass
+                     , MultiParamTypeClasses
 
 source-repository head
   type:     git
