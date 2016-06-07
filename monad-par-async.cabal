@@ -1,0 +1,28 @@
+name:                monad-par-async
+version:             0.0.1
+--synopsis:
+--description:
+homepage:            http://github.com/TerrorJack/monad-par-async
+license:             BSD3
+license-file:        LICENSE
+author:              Shao Cheng
+maintainer:          astrohavoc@gmail.com
+copyright:           2016 Shao Cheng
+category:            Concurrency
+build-type:          Simple
+cabal-version:       >=1.24
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Control.Monad.Par.Async
+  default-language:    Haskell2010
+  build-depends:       base
+                     , monad-par
+                     , abstract-par
+  ghc-options:         -Wall
+  default-extensions:  Strict
+                     , DeriveAnyClass
+
+source-repository head
+  type:     git
+  location: https://github.com/TerrorJack/monad-par-async
