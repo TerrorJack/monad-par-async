@@ -19,6 +19,7 @@ library
   build-depends:       base
                      , monad-par
                      , abstract-par
+                     , exceptions
   ghc-options:         -Wall
   default-extensions:  Strict
                      , DeriveAnyClass

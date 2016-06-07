@@ -2,6 +2,7 @@ module Control.Monad.Par.Async where
 
 import Control.Applicative
 import Control.Exception
+import Control.Monad.Catch hiding (try)
 import Control.Monad.IO.Class
 import Control.Monad.Par.Class
 import Control.Monad.Par.IO
@@ -59,3 +60,15 @@ instance Semigroup a => Semigroup (Async a) where
 instance Monoid a => Monoid (Async a) where
     mempty = return mempty
     a `mappend` b = mappend <$> a <*> b
+
+instance MonadThrow Async where
+    throwM = Async . return . Left . SomeException
+
+instance MonadCatch Async where
+    catch m f = Async $ do
+        r <- unAsync m
+        case r of
+            Left e -> case fromException e of
+                Just e' -> unAsync $ f e'
+                _ -> return $ Left e
+            Right a -> return $ Right a
